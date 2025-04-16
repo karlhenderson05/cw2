@@ -1,0 +1,16 @@
+def rent_book():
+    # Start
+    book_title = input("Enter the title of the book to rent: ")
+
+    # Check if book exists in inventory
+    if book_title in inventory:
+        # Check if the book is in stock
+        if inventory[book_title]["stock"] > 0:
+            # Decrease stock by 1
+            inventory[book_title]["stock"] -= 1
+            print("Book rented successfully.")
+        else:
+            print("Sorry, the book is currently out of stock.")
+    else:
+        print("Book not found in inventory.")
+    # End
