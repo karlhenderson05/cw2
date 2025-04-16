@@ -1,0 +1,21 @@
+def add_new_book():
+    # Start
+    title = input("Enter book title: ")
+    author = input("Enter author name: ")
+    isbn = input("Enter ISBN: ")
+    price = float(input("Enter price: "))
+    stock = int(input("Enter stock quantity: "))
+
+    # Save book details (this would be saving to a database or list in real code)
+    book = {
+        "title": title,
+        "author": author,
+        "isbn": isbn,
+        "price": price,
+        "stock": stock
+    }
+
+    print("Book added successfully.")
+    # End
+
+add_new_book()
