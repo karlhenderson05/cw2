@@ -1,0 +1,389 @@
+import csv
+from collections import defaultdict
+
+def libraryStock():
+    try:
+        with open("Books data.csv", "r") as book:
+            reader = csv.reader(book)
+            for row_num, row in enumerate(reader, start=0):
+                if not row or len(row) < 8:
+                    print(f"{row_num}:{row}")
+                    continue
+
+                author = f"{row[0]} {row[1]}"
+                title = row[2]
+                Format = row[3]  # Keep the "Format" variable capitalised as "format" is a keyword
+                publisher = row[4]
+                cost = float(row[5])
+                stock = row[6]
+                genre = row[7]
+                print(f"Author: {author}, Title: {title}, Format: {Format}, "
+                      f"Publisher: {publisher}, Cost: {cost:.2f}, Stock: {stock}, Genre: {genre}")
+
+            reader.close()
+
+            returnToMenu = input("Enter any character (or space) to return to the menu: ")
+            loop = True
+            while loop == True:
+                if returnToMenu != "":
+                    loop = False
+                    print()
+                    print()
+                    print() #Adds 3 blank lines to improve readability of the menu
+                    menu()
+                else:
+                    returnToMenu = input("Enter any character (or space) to return to the menu: ")
+                    loop = True
+    except PermissionError:
+        print("Please ensure you have permission to use this file.")
+        menu()
+            
+
+def summaryReport():
+    try:
+        with open("Books data.csv", "r") as book:
+            reader = csv.reader(book)
+            next(reader)#Skips the first line - The header
+            totalBooks = 0 
+            totalValue = 0
+            totalTitles = 0
+            totalValueSimple = 0
+            for row in reader:
+                stock = int(row[5].strip())
+                totalBooks += stock
+                cost = float(row[4].strip())
+                totalValue += stock*cost
+                totalValueSimple += cost
+                totalTitles += 1
+            averagePrice = totalValue/totalBooks #This calculates the total weighted average of the books. I.e, total value/total amount of books
+            averagePriceSimple = totalValueSimple/totalTitles #This calculates the simple average. Total value/total amount of unique books (or titles)
+            print(f"The total amount of books is: {totalBooks}", f"The total amount of unique books is: {totalTitles}", f"The total value of the books is: {totalValue}", f"The weighted average price of books is: {averagePrice:.2f}",
+                 f"The simple average price of books is: {averagePriceSimple:.2f}")
+
+            reader.close()
+
+            returnToMenu = input("Enter any character (or space) to return to the menu: ")
+            loop = True
+            while loop == True:
+                if returnToMenu != "":
+                    loop = False
+                    print()
+                    print()
+                    print() #Adds 3 blank lines to improve readability of the menu
+                    menu()
+                else:
+                    returnToMenu = input("Enter any character (or space) to return to the menu: ")
+                    loop = True
+
+                        
+    except PermissionError:
+        print("Please ensure you have permission to use this file.")
+        menu()
+
+
+def titlePerGenre():
+    try:
+        with open("books data.csv", "r") as book:
+            reader = csv.reader(book)
+            next(reader)
+            amountPerGenre = defaultdict(int)
+            print(row[6])#For debugging purposes
+            for row in reader:
+                genre = row[6]
+                amountPerGenre[genre] += 1
+
+            for genre, count in amountPerGenre.items():
+                print(f"Genre: {genre} - {count} book(s)")
+
+
+            reader.close()
+
+            returnToMenu = input("Enter any character (or space) to return to the menu: ")
+            loop = True
+            while loop == True:
+                if returnToMenu != "":
+                    loop = False
+                    print()
+                    print()
+                    print() #Adds 3 blank lines to improve readability of the menu
+                    menu()
+                else:
+                    returnToMenu = input("Enter any character (or space) to return to the menu: ")
+                    loop = True
+                    
+    except PermissionError:
+        print("Please ensure you have permission to use this file.")
+        menu()
+        
+def AddNewBook():
+    try:
+        with open("Books data.csv", "a") as book:
+            writer = csv.writer(book)
+            try:
+                author = str(input("Enter the author's full name: "))
+                title = str(input("Enter the title: "))
+                Format = str(input("Enter the format: "))
+                publisher = str(input("Enter the publisher's name: "))
+                cost = float(input("Enter the cost (without the £): ")) #float acts as form validation
+                stock = int(input("Enter the amount of books for this title: ")) #int acts as form validation
+                genre = str(input("Enter the genre: "))
+                
+            except ValueError:
+                print("An incorrect data type was entered. Please try again.") #if an incorrect data type is entered above, this will alert the user and start the function over again, asking the user for their input again.
+                AddNewBook()
+                
+            print(f"Author: {author}", f"Title: {title}", f"Format: {format}", f"Publisher: {publisher}", f"Cost: £{cost}", f"Stock: {stock}", f"Genre: {genre}") #This will print the values the user has entered so they can check them
+
+            noError = False
+            update = input("Would you like to submit these changes [Y/N]: ")
+            while noError == False:
+                if update.lower() == "y":
+                    noError = True
+                    writer.writerow([author, title, Format, publisher, cost, stock, genre])
+                    print("Changes have been succesfully made")
+                    writer.close()
+                    summaryReport()
+                elif update.lower() == "n":
+                    noError = True
+                    print("Changes have not been made")
+                    writer.close()
+                    menu()
+                else:
+                    print("Please enter Y to submit changes or N to undo changes")
+                    error = False
+                    update = input("Would you like to submit these changes [Y/N]: ")
+                    
+    except PermissionError:
+        print("Please ensure the csv file is closed and you have permissions to use it.")
+        menu()
+        
+            
+def searchBook():
+    selection = input("Please enter the title of the book you wish to find: ")
+    try:
+        with open("books data.csv", "r") as book:
+            reader = csv.reader(book)
+            next(reader)
+            found = False
+            loop = True
+            remove = True
+            rowNumber = 0
+            
+            for line, row in enumerate(reader, start=0):
+                if len(row) < 7 or found == True:
+                    continue
+                
+                rowNumber = line
+                title = row[1].strip()
+                stock = int(row[5])
+                if title.lower() == selection.lower() and stock > 0:
+                    print("There are", stock, "copies of", title)
+                    found = True
+                elif title.lower() == selection.lower() and stock == 0:
+                    print("Book found. There are no copies of", title, "in stock.")
+                    found = True
+                    
+            if found == False:
+                print("Book not found. To add it to the list of available titles, please select 4 in the menu.")
+                print()
+                print()
+                menu()
+                
+
+            if found == True:
+                while loop:
+                    add = input(f"Would you like to add copies to {title} [Y/N]: ")
+                    if add.lower() == "y":
+                        addCopies(title, rowNumber)
+                        loop = False
+                    elif add.lower() == "n":
+                        loop = False
+                    else:
+                        print("Please enter Y or N")
+
+                while remove:
+                    option = input(f"Would you like to take out copies of {title} [Y/N]: ")
+                    if option.lower() == "y":
+                        removeCopies(title, rowNumber)
+                        remove = False
+                    elif option.lower() == "n":
+                        remove = False
+                        menu()
+                    else:
+                        print("Please enter Y or N")
+
+                
+    except PermissionError:
+        print("Please ensure you have permissions to use the csv file.")
+        menu()
+
+def addCopies(title, row):
+    title = title
+    found = False
+    try:
+        with open("Books data.csv", "r") as book:
+            reader = csv.reader(book)
+            rows = list(csv.reader(book))
+            amount = int(input(f"How many copies would you like to add to {title}: "))
+            
+            for i in range(len(rows)):
+                if len(rows[i]) < 6:
+                    continue
+                if rows[i][1].strip().lower() == title.strip().lower():
+                    stock = int(rows[i][5])
+                    stock += amount
+                    rows[i][5] = str(stock)
+                    found = True
+                    break
+                
+        if found == False:
+            print("An error has occured")
+            menu()
+
+        with open("Books data.csv", "w", newline='') as book:
+                writer = csv.writer(book)
+                writer.writerows(rows)
+            
+        print("Succesfully updated stock")
+        print()
+        print()
+        menu()
+        
+
+    except PermissionError:
+        print("Please make sure the csv file is closed and you have permissions to access it")
+
+
+def removeCopies(title, row):
+    title = title
+    found = False
+    try:
+        with open("Books data.csv", "r") as book:
+            reader = csv.reader(book)
+            rows = list(csv.reader(book))
+            amount = int(input(f"How many copies would you like take out: "))
+            
+            for i in range(len(rows)):
+                if len(rows[i]) < 6:
+                    continue
+                if rows[i][1].strip().lower() == title.strip().lower():
+                    stock = int(rows[i][5])
+                    stock -= amount
+                    rows[i][5] = str(stock)
+                    found = True
+                    break
+                
+        if found == False:
+            print("An error has occured")
+            menu()
+
+        with open("Books data.csv", "w", newline='') as book:
+                writer = csv.writer(book)
+                writer.writerows(rows)
+            
+        print("Succesfully updated stock")
+        print()
+        print()
+        menu()
+        
+
+    except PermissionError:
+        print("Please make sure the csv file is closed and you have permissions to access it")
+        
+def checkOrdered():
+    try:
+        with open("books data.csv", "r") as book:
+            reader = csv.reader(book)
+            next(reader)
+            
+
+            
+        returnToMenu = input("Enter any character (or space) to return to the menu: ")
+        loop = True
+        while loop == True:
+            if returnToMenu != "":
+                loop = False
+                print()
+                print()
+                print() #Adds 3 blank lines to improve readability of the menu
+                menu()
+            else:
+                returnToMenu = input("Enter any character (or space) to return to the menu: ")
+                loop = True
+                
+    except PermissionError:
+        print("Please ensure the csv file is closed and you have permissions to use it.")
+        menu()
+
+def titlePerGenreGraphed():
+    try:
+        with open("books data.csv", "r") as book:
+            reader = csv.reader(book)
+            next(reader)
+
+
+            
+        returnToMenu = input("Enter any character (or space) to return to the menu: ")
+        loop = True
+        while loop == True:
+            if returnToMenu != "":
+                loop = False
+                print()
+                print()
+                print() #Adds 3 blank lines to improve readability of the menu
+                menu()
+            else:
+                returnToMenu = input("Enter any character (or space) to return to the menu: ")
+                loop = True
+                
+    except PermissionError:
+        print("Please ensure the csv file is closed and you have permissions to use it.")
+        menu()
+
+def menu():
+    print("To see the library's stock, press 1.")
+    print("To see the library's summary report, press 2.")
+    print("To see a breakdown of the amount of books per genre, press 3.")
+    print("To add a new book, press 4.")
+    print("To search for a book, press 5.")
+    print("To see what books have been ordered, press 6.")
+    print("To see the amount of books per genre in a bar chart form, press 7.")
+    print("To exit, press 8.")
+    print()
+    validChoice = False
+    try:
+        while validChoice == False:
+            choice = int(input("Please enter your choice: "))
+            if choice == 1:
+                validChoice = True
+                libraryStock()
+            elif choice == 2:
+                validChoice = True
+                summaryReport()
+            elif choice == 3:
+                validChoice = True
+                titlePerGenre()
+            elif choice == 4:
+                validChoice = True
+                AddNewBook()
+            elif choice == 5:
+                validChoice = True
+                searchBook()
+            elif choice == 6:
+                validChoice = True
+                checkOrdered()
+            elif choice == 7:
+                validChoice = True
+                titlePerGenreGraphed()
+            elif choice == 8:
+                exit()
+            else:
+                validChoice = False
+    except ValueError:
+        print()
+        print("Please enter only 1 value between 1 and 8")
+        print()
+        print()
+        menu()
+
+menu()
